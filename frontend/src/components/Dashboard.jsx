@@ -10,15 +10,35 @@ const Dashboard = () => {
         fetchPrinters();
     }, []);
 
+    // Fetch all printers from the API
     const fetchPrinters = async () => {
-        const res = await axios.get('/api/printers');
-        setPrinters(res.data);
+        try {
+            const res = await axios.get('/api/printers');
+            setPrinters(res.data);
+        } catch (error) {
+            console.error('Failed to fetch printers:', error);
+        }
+    };
+
+    // Add a new printer through the PrinterForm component
+    const handleAddPrinter = async (printer) => {
+        try {
+            await axios.post('/api/printers', printer);
+            fetchPrinters();
+        } catch (error) {
+            console.error('Failed to add printer:', error);
+        }
     };
 
     return (
         <div>
-            <PrinterForm onAdd={fetchPrinters} />
-            <div className="grid grid-cols-3 gap-4">
+            <h1 className="text-2xl font-bold mb-4">Printer Toner Monitor</h1>
+
+            {/* Add Printer Form */}
+            <PrinterForm onAdd={handleAddPrinter} />
+
+            {/* Printer Cards */}
+            <div className="grid grid-cols-3 gap-4 mt-4">
                 {printers.map((printer) => (
                     <PrinterCard 
                         key={printer._id} 

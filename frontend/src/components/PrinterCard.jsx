@@ -4,11 +4,25 @@ import axios from 'axios';
 const PrinterCard = ({ printer, onRefresh, onDelete }) => {
     const statusColor = printer.isOnline ? 'bg-green-500' : 'bg-red-500';
 
+    // Function to handle refreshing the printer's status
+    const handleRefresh = async () => {
+        try {
+            await axios.get(`/api/printers/refresh/${printer._id}`);
+            onRefresh(); // Refresh the parent component's data
+        } catch (error) {
+            console.error('Failed to refresh printer:', error);
+        }
+    };
+
     // Function to handle deleting a printer
     const handleDelete = async () => {
         if (window.confirm(`Are you sure you want to delete ${printer.name}?`)) {
-            await axios.delete(`/api/printers/${printer._id}`);
-            onDelete(); // Refresh the parent component's data
+            try {
+                await axios.delete(`/api/printers/${printer._id}`);
+                onDelete(); // Refresh the parent component's data
+            } catch (error) {
+                console.error('Failed to delete printer:', error);
+            }
         }
     };
 
@@ -33,7 +47,7 @@ const PrinterCard = ({ printer, onRefresh, onDelete }) => {
             <div className="flex items-center mb-2">
                 <span className={`w-4 h-4 rounded-full ${statusColor} mr-2`}></span>
                 <h2 className="font-bold flex-1">{printer.name}</h2>
-                
+
                 {/* Delete Button */}
                 <button 
                     onClick={handleDelete} 
@@ -52,7 +66,7 @@ const PrinterCard = ({ printer, onRefresh, onDelete }) => {
 
                 {/* Render progress bars for all available toner levels */}
                 {renderProgressBar('Black', printer.tonerLevels?.black, 'bg-black')}
-                
+
                 {printer.isColorPrinter && (
                     <>
                         {renderProgressBar('Cyan', printer.tonerLevels?.cyan, 'bg-cyan-500')}
@@ -62,8 +76,9 @@ const PrinterCard = ({ printer, onRefresh, onDelete }) => {
                 )}
             </div>
 
+            {/* Refresh Button */}
             <button 
-                onClick={() => onRefresh(printer._id)} 
+                onClick={handleRefresh} 
                 className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
                 Refresh
